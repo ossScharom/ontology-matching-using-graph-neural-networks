@@ -1,0 +1,2 @@
+Fixed a bug, the shapes of the output node embeddings were totally wrong,
+because I used hstack instead of vstack :o

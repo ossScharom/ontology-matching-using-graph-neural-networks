@@ -1,0 +1,31 @@
+#! /bin/bash
+#SBATCH --ntasks=5
+#SBATCH --time=10:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=slurm@scharom.de
+#SBATCH --partition=clara
+#SBATCH --mem=50G
+# #SBATCH --gres=gpu:v100:1
+#SBATCH --nodes=5
+#SBATCH --cpus-per-task=20
+
+
+
+module load Python
+
+cd ~/code
+source env/bin/activate
+
+random_seeds=($RANDOM $RANDOM $RANDOM $RANDOM $RANDOM)
+
+
+for random_seed in "${random_seeds[@]}"
+do
+	echo "Random seed: $random_seed"
+	srun --exclusive --cpus-per-task=20 --ntasks=1 --nodes=1 python src/omunet/main.py train NCIT_TO_DOID -c config/dev.conf -r $random_seed &
+	srun --exclusive --cpus-per-task=20 --ntasks=1 --nodes=1 python src/omunet/main.py train OMIM_TO_ORDO -c config/dev.conf -r $random_seed &
+	srun --exclusive --cpus-per-task=20 --ntasks=1 --nodes=1 python src/omunet/main.py train SNOMED_TO_FMA_BODY -c config/dev.conf -r $random_seed &
+	srun --exclusive --cpus-per-task=20 --ntasks=1 --nodes=1 python src/omunet/main.py train SNOMED_TO_NCIT_NEOPLAS -c config/dev.conf -r $random_seed &
+	srun --exclusive --cpus-per-task=20 --ntasks=1 --nodes=1 python src/omunet/main.py train SNOMED_TO_NCIT_PHARM -c config/dev.conf -r $random_seed &
+	wait
+done

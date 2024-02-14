@@ -1,0 +1,17 @@
+#! /bin/bash
+#SBATCH --ntasks=1
+#SBATCH --time=1:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=slurm@scharom.de
+#SBATCH --partition=clara
+#SBATCH --mem=10G
+# #SBATCH --gres=gpu:v100:1
+#SBATCH --cpus-per-task=1
+
+module load CUDA/11.7.0
+module load Python
+
+cd ~/code
+source env/bin/activate
+
+python -m omunet preprocess -c config/dev.conf

@@ -1,0 +1,26 @@
+#! /bin/bash
+#SBATCH --ntasks=5
+#SBATCH --time=10:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=slurm@scharom.de
+#SBATCH --partition=clara
+#SBATCH --mem=50G
+# #SBATCH --gres=gpu:v100:1
+#SBATCH --nodes=5
+#SBATCH --cpus-per-task=1
+
+
+
+module load CUDA/11.7.0
+module load Python
+
+cd ~/code
+source env/bin/activate
+
+srun --exclusive --cpus-per-task=1 --ntasks=1 --nodes=1 python src/omunet/main.py create-candidates NCIT_TO_DOID -c config/dev.conf &
+srun --exclusive --cpus-per-task=1 --ntasks=1 --nodes=1 python src/omunet/main.py create-candidates OMIM_TO_ORDO -c config/dev.conf &
+srun --exclusive --cpus-per-task=1 --ntasks=1 --nodes=1 python src/omunet/main.py create-candidates SNOMED_TO_FMA_BODY -c config/dev.conf &
+srun --exclusive --cpus-per-task=1 --ntasks=1 --nodes=1 python src/omunet/main.py create-candidates SNOMED_TO_NCIT_NEOPLAS -c config/dev.conf &
+srun --exclusive --cpus-per-task=1 --ntasks=1 --nodes=1 python src/omunet/main.py create-candidates SNOMED_TO_NCIT_PHARM -c config/dev.conf &
+
+wait
